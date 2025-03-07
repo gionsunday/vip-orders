@@ -30,19 +30,24 @@ const OrdersTable = () => {
   };
 
   // Fetch orders on component mount
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        //console.log(data); // Log the imported data for debugging
-        setOrders(data as OrderType[]); // Set the orders state with the imported data
-      } catch (error) {
-        console.error('Error fetching orders:', error); // Log any errors
-      } finally {
-        setLoading(false); // Set loading to false once data is fetched (or if an error occurs)
-      }
-    };
 
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('https://67caf6e93395520e6af3ced9.mockapi.io/api/v1/vip/orders');
+      const data = await response.json();
+      setOrders(data as OrderType[]); // Set the orders state with the imported data
+    } catch (error) {
+      console.error('Error fetching orders:', error); // Log any errors
+     // setOrders(data as OrderType[])//set Orders to local order data from data.json
+    } finally {
+      setLoading(false); // Set loading to false once data is fetched (or if an error occurs)
+    }
+  };
+
+  useEffect(() => {
     fetchOrders();
+    const interval = setInterval(fetchOrders, 3000); // Poll every 3 seconds
+    return () => clearInterval(interval); // Cleanup interval
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // Function to mark an order as completed
@@ -59,7 +64,7 @@ const OrdersTable = () => {
 
       // Update the order status to "Completed"
       return prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: FILTER_STATUS.COMPLETED } : order
+        order.id === orderId ? { ...order, status: FILTER_STATUS.COMPLETED  } : order
       );
     });
   };
