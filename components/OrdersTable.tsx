@@ -5,18 +5,21 @@ import React, { useEffect, useState, useMemo } from 'react';
 import OrderRow from './OrderRow';
 import FilterSortControls from './FilterSortControls';
 import Loader from './Loader';
-import data from '@/utils/data.json'; // Import JSON data
+//import data from '@/utils/data.json'; // Import local JSON data
 import { OrderType } from '@/types';
+import Auth from './Auth';
 
 const OrdersTable = () => {
   // State to store the list of orders
   const [orders, setOrders] = useState<OrderType[]>([]);
   // State to manage loading state
   const [loading, setLoading] = useState(true);
+  const [loginStatus, setLoginStatus] = useState<boolean>(false)
   // State to manage the filter status (e.g., 'All', 'Completed')
   const [filterStatus, setFilterStatus] = useState('All');
   // State to manage the sorting criteria (e.g., 'timestamp', 'totalPrice')
   const [sortBy, setSortBy] = useState('timestamp');
+  const [errorAlert, setErrorAlert] = useState<boolean>(false)
 
   // Constants for filter and sort options
   const FILTER_STATUS = {
@@ -38,7 +41,7 @@ const OrdersTable = () => {
       setOrders(data as OrderType[]); // Set the orders state with the imported data
     } catch (error) {
       console.error('Error fetching orders:', error); // Log any errors
-     // setOrders(data as OrderType[])//set Orders to local order data from data.json
+      // setOrders(data as OrderType[])//set Orders to local order data from data.json
     } finally {
       setLoading(false); // Set loading to false once data is fetched (or if an error occurs)
     }
@@ -51,7 +54,7 @@ const OrdersTable = () => {
   }, []); // Empty dependency array ensures this runs only once on mount
 
   // Function to mark an order as completed
-  const handleCompleteOrder = (orderId: string) => {
+  const handleCompleteOrder = async (orderId: string) => {
     setOrders((prevOrders) => {
       // Find the order to update
       const orderToUpdate = prevOrders.find((order) => order.id === orderId);
@@ -64,9 +67,24 @@ const OrdersTable = () => {
 
       // Update the order status to "Completed"
       return prevOrders.map((order) =>
-        order.id === orderId ? { ...order, status: FILTER_STATUS.COMPLETED  } : order
+        order.id === orderId ? { ...order, status: FILTER_STATUS.COMPLETED } : order
       );
     });
+    try {
+      const response = await fetch(`https://67caf6e93395520e6af3ced9.mockapi.io/api/v1/vip/orders/${orderId}`,
+        {
+          method: "put",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            status: FILTER_STATUS.COMPLETED
+          })
+        })
+      ///console.log(await response.json())
+    } catch (error) {
+      console.error(error)
+    }
   };
 
   // Memoized function to filter orders based on the selected status
@@ -90,14 +108,42 @@ const OrdersTable = () => {
     });
   }, [filteredOrders, sortBy]); // Re-run when filteredOrders or sortBy changes
 
+
+  // Authorization status checker
+  const handleAuth = () => {
+    {
+      loginStatus == true ?
+      setLoginStatus(false) : setLoginStatus(true)
+    }
+
+  }
+
   // Display a loader while data is being fetched
   if (loading) {
     return <Loader />;
   }
 
+
+  const authError = () => {
+    alert("Authorazation failed! Please Login to update Order.")
+  }
+
   // Render the orders table with filter and sort controls
   return (
     <div>
+
+      {/* Component for login or logout btn */}
+      <Auth
+        title={!loginStatus ? "Login" : "Logout"}
+        constainerStyles={
+          !loginStatus
+            ? "bg-secondary-orange text-white rounded-full m-5"
+            : "bg-primary-blue text-white rounded-full m-5"
+        }
+
+        handleClick={handleAuth}
+      />
+
       {/* Component for filtering and sorting controls */}
       <FilterSortControls
         filterStatus={filterStatus}
@@ -126,6 +172,8 @@ const OrdersTable = () => {
               <OrderRow
                 key={order.id}
                 order={order}
+                loginStatus={loginStatus}
+                authError={authError}
                 handleCompleteOrder={handleCompleteOrder}
               />
             ))}

@@ -1,6 +1,12 @@
 /**My types declaration */
+import { MouseEventHandler } from "react";
 
-
+export interface CustomButtonProps{
+    title: string;
+    constainerStyles? :string;
+    handleClick?: MouseEventHandler<HTMLButtonElement>;
+    btnType?: string
+}
 
 
 /**
@@ -34,5 +40,7 @@ export interface OrderType {
  */
 export interface OrderRowProps {
     order: OrderType; // The order object to display
-    handleCompleteOrder: (orderId: string) => void; // Function to mark an order as completed
+    loginStatus: boolean;
+    authError:()=>void;
+    handleCompleteOrder: (orderId: string) => {}// Function to mark an order as completed
 }

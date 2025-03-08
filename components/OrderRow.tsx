@@ -2,14 +2,16 @@ import { OrderRowProps } from '@/types'; //import orderRowProps
 import React from 'react';
 
 
-const OrderRow = ({ order, handleCompleteOrder }: OrderRowProps) => (
+
+const OrderRow = ({ order, handleCompleteOrder, loginStatus, authError }: OrderRowProps) => (
+
   <tr
     className="bg-white text-gray-500 border-b border-blue-400 
       hover:opacity-80 hover:bg-slate-50"
     key={order.id}
   >
     <td className="border-b px-6 py-4 text-gray-500">{order.id}</td>
- 
+
     <td className="px-6 py-4 border-b">{order.customer}</td>
 
     <td className="px-6 py-4 border-b">{order.items.join(', ')}</td>
@@ -42,7 +44,14 @@ const OrderRow = ({ order, handleCompleteOrder }: OrderRowProps) => (
           : 'bg-green-300 cursor-not-allowed text-white' // Green disabled button for completed orders
           }`}
         disabled={order.status === 'Completed'} // Disable button if order is completed
-        onClick={() => handleCompleteOrder(order.id)} // Trigger complete order action
+        onClick={() => {
+          if (loginStatus == false) {
+            authError()
+          }
+          else {
+            handleCompleteOrder(order.id)
+          }
+        }} // Trigger complete order action
       >
         {order.status.toLowerCase() === 'completed'
           ? 'Order Completed' // Text for completed orders
