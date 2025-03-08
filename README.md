@@ -2,7 +2,20 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
+Clone the repo:
+```bash
+git clone https://github.com/gionsunday/vip-orders.git
+
+```
+
+install dependencies:
+```bash
+ npm install
+ #or 
+ yarn install 
+
+```
+ Now, run the development server:
 
 ```bash
 npm run dev
